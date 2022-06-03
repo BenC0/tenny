@@ -15,7 +15,9 @@ class Player:
         self.set_target_to_first_available_space()
         self.select_block(self.target_block)
         self.place_block()
-        row_num, col_num = 0, 0
+        self.reset_target()
+    
+    def reset_target(self):
         self.target_block = 0
     
     def set_target_to_first_available_space(self):
