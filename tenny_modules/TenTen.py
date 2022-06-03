@@ -54,7 +54,7 @@ class TenTen:
         if self.game.is_action_possible():
             if immediate:
                 self.player.play()
-            self.window.after(1000, self.player_start)
+            self.window.after(10, self.player_start)
 
     def canvas_click(self, event):
         x = int(event.x / 50)
@@ -109,7 +109,7 @@ class TenTen:
                                 tx = x + ca[index][0]
                                 ty = y + ca[index][1]
                                 if tx < 10 and ty < 10:
-                                    self.draw_rect(tx, ty, "yellow")
+                                    self.draw_rect(tx, ty, "blue")
                                     self.last_preview.append([x + ca[index][0], y + ca[index][1]])
 
     def place(self, x, y, coordinates):
