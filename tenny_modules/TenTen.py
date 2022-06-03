@@ -54,7 +54,7 @@ class TenTen:
         if self.game.is_action_possible():
             if immediate:
                 self.player.play()
-            self.window.after(10, self.player_start)
+            self.window.after(5, self.player_start)
 
     def canvas_click(self, event):
         x = int(event.x / 50)
