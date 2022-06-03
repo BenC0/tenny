@@ -12,13 +12,13 @@ class Player:
         self.target_coord = (-1, -1)
 
     def play(self):
-        self.set_to_first_available_space()
+        self.set_target_to_first_available_space()
         self.select_block(self.target_block)
         self.place_block()
         row_num, col_num = 0, 0
         self.target_block = 0
     
-    def set_to_first_available_space(self):
+    def set_target_to_first_available_space(self):
         for i in range(0, len(self.hand)):
             self.target_block = i
             self.select_block(self.target_block)
