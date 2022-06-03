@@ -9,7 +9,7 @@ class Player:
         self.points = gui.game.get_points()
         self.hand = gui.game.current_blocks
         self.field = gui.game.field
-        self.brrrrr = True
+        self.brrrrr = False
         self.reset_target()
 
     class Event:
