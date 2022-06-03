@@ -5,10 +5,9 @@ This script runs and plays a game of 1010.
 
 ## To do
 1. Next move line clearance prediction
-2. Max line clearance
-3. min/max gaps and borders
-4. evaluate gaps left across board
-5. Combining shapes in hand
+2. min/max gaps and borders
+3. evaluate gaps left across board
+4. Combining shapes in hand
 
 ---
 ## Notes
