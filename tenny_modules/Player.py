@@ -15,6 +15,7 @@ class Player:
         self.set_target_to_first_available_space()
         self.select_block(self.target_block)
         self.place_block()
+        print(f"Moves played: {self.gui.moves_played}, Score: {self.gui.game.get_points()}")
         self.reset_target()
     
     def reset_target(self):

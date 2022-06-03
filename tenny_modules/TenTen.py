@@ -40,6 +40,7 @@ class TenTen:
 
         self.block_canvas.create_image(0, 0, image=self.bc_overlay, anchor="nw")
         self.img_id = self.canvas.create_image(0, 0, image=self.img, anchor="nw")
+        self.moves_played = 0
 
         self.game.generate_blocks(True)
         self.player = Player(self)
@@ -67,6 +68,7 @@ class TenTen:
                     block.destroy()
                     self.game.selected_block = None
                     self.game.current_blocks.remove(block)
+                    self.moves_played += 1
                     if len(self.game.current_blocks) == 0:
                         self.game.generate_blocks()
                         self.render_current_blocks()
