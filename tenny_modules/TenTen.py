@@ -116,13 +116,6 @@ class TenTen:
         for index in range(0, len(coordinates)):
             self.draw_rect_on_coordinates(x + coordinates[index][0], y + coordinates[index][1])
             self.game.set_filed(x + coordinates[index][0], y + coordinates[index][1], 1)
-    
-    def preview_placement(self, x, y, coordinates):
-        preview = GamePreview(self.game)
-        for index in range(0, len(coordinates)):
-            preview.set_filed(x + coordinates[index][0], y + coordinates[index][1], 1)
-
-        return preview.points
 
     def remove_last_values(self, event):
         self.last_x = None
@@ -236,78 +229,6 @@ class Game:
             self.current_blocks.append(Block(randint(0, len(self.blocks.block_list) - 1), self.blocks, self.gui))
         if first_run == False:
             self.gui.player.update_hand(self.current_blocks)
-
-    def fits(self, x, y, coordinates):
-        for index in range(0, len(coordinates)):
-            tx = x + coordinates[index][0]
-            ty = y + coordinates[index][1]
-
-            if 0 <= tx < 10 and 0 <= ty < 10:
-                if self.field[ty][tx] == 1:
-                    return False
-            else:
-                return False
-        return True
-
-    def is_action_possible(self):
-        for y in range(0, len(self.field)):
-            for x in range(0, len(self.field[y])):
-                for block in self.current_blocks:
-                    if self.fits(x, y, block.coord_array):
-                        return True
-        return False
-
-
-class GamePreview:
-    def __init__(self, game):
-        self.field = game.field
-
-        self.points = game.points
-        self.blocks = BLOCKS()
-        self.current_blocks = game.current_blocks
-        self.selected_block = game.selected_block
-
-    def check_lines(self):
-        lines = []
-        for line in range(0, 10):
-            flag = 1
-            for i in range(0, 10):
-                if self.field[line][i] != 1:
-                    flag = 0
-                    break
-            if flag == 1:
-                lines.append(line)
-        return lines
-
-    def check_columns(self):
-        columns = []
-        for column in range(0, 10):
-            flag = 1
-            for i in range(0, 10):
-                if self.field[i][column] != 1:
-                    flag = 0
-                    break
-            if flag == 1:
-                columns.append(column)
-        return columns
-
-    def get_points(self):
-        return self.points
-
-    def add_points(self, points):
-        self.points += points
-
-    def clear_line(self, index):
-        for i in range(0, 10):
-            self.set_filed(i, index, 0)
-
-    def clear_column(self, index):
-        for i in range(0, 10):
-            self.set_filed(index, i, 0)
-
-    def set_filed(self, x, y, full):
-        self.add_points(1)
-        self.field[y][x] = full
 
     def fits(self, x, y, coordinates):
         for index in range(0, len(coordinates)):
