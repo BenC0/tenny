@@ -1,4 +1,4 @@
-import enum
+import enum, copy
 from turtle import pos
 from matplotlib.style import available
 import numpy as np
@@ -10,6 +10,7 @@ class Player:
         self.hand = gui.game.current_blocks
         self.field = gui.game.field
         self.brrrrr = True
+        # self.brrrrr = False
         self.reset_target()
 
     class Event:
@@ -21,7 +22,8 @@ class Player:
         if self.final_preview_shown or (self.brrrrr and self.all_possible_spaces != None):
             # self.set_target_to_first_available_space()
             # self.set_target_to_least_gaps()
-            self.set_target_to_most_borders()
+            # self.set_target_to_most_borders()
+            self.set_target_to_most_lines_cleared()
             self.select_block(self.target_block)
             self.place_block()
             print(f"Moves played: {self.gui.moves_played}, Score: {self.gui.game.get_points()}")
@@ -41,6 +43,53 @@ class Player:
         else:
             self.show_possible_preview()
     
+    def check_lines(self, preview):
+        lines_filled = 0
+        for row in range(0, 10):
+            row_count = 0
+            for column in range(0, 10):
+                row_count += preview[row][column]
+            if row_count == 10:
+                lines_filled += 1
+        return lines_filled     
+    
+    def check_columns(self, preview):
+        columns_filled = 0
+        for column in range(0, 10):
+            col_count = 0
+            for row in range(0, 10):
+                col_count += preview[row][column]
+            if col_count == 10:
+                columns_filled += 1
+        return columns_filled        
+
+    def add_shape(self, input_field, shape, xy, val = 1):
+        field = copy.deepcopy(input_field)
+        for x, y in shape:
+            field[x + xy[0]][y + xy[1]] = val
+        return field
+
+    def preview_placement(self, shape, offset, field):
+        return self.add_shape(field, shape, offset)
+
+    def set_target_to_most_lines_cleared(self):
+        field = copy.deepcopy(self.gui.game.field)
+        possible_spaces = self.all_possible_spaces
+        scored_spaces = []
+        for key, space in enumerate(possible_spaces):
+            offset, shape, = (space[1], space[2]), space[3]
+            preview = self.preview_placement(shape, offset, field)
+            lines = self.check_lines(preview)
+            columns = self.check_columns(preview)
+            scored_spaces.append([key, lines + columns])
+
+        scored_spaces.sort(key=lambda x: x[1], reverse=True)
+        most_lines = scored_spaces[0]
+        most_lines_space = possible_spaces[most_lines[0]]
+        print(f"most_lines: {most_lines}")
+        print(f"most_lines_space: {most_lines_space}")
+        self.set_target(most_lines_space)
+
     def update_current_preview(self):
         try:
             self.preview_shown = 0
