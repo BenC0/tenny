@@ -9,7 +9,7 @@ class Player:
         self.points = gui.game.get_points()
         self.hand = gui.game.current_blocks
         self.field = gui.game.field
-        self.brrrrr = False
+        self.brrrrr = True
         self.reset_target()
 
     class Event:
@@ -20,7 +20,8 @@ class Player:
     def play(self):
         if self.final_preview_shown or (self.brrrrr and self.all_possible_spaces != None):
             # self.set_target_to_first_available_space()
-            self.set_target_to_least_gaps()
+            # self.set_target_to_least_gaps()
+            self.set_target_to_most_borders()
             self.select_block(self.target_block)
             self.place_block()
             print(f"Moves played: {self.gui.moves_played}, Score: {self.gui.game.get_points()}")
@@ -155,6 +156,19 @@ class Player:
         neighbour_gaps = [coord for coord in neighbours if self.coord_is_full(field, coord) == False]
         neighbour_borders = [coord for coord in neighbours if self.coord_is_full(field, coord)]
         return (neighbour_gaps, neighbour_borders)
+
+    def set_target_to_most_borders(self):
+        possible_spaces = self.all_possible_spaces
+        scored_spaces = []
+        for key, space in enumerate(possible_spaces):
+            offset, shape, = (space[1], space[2]), space[3]
+            space_surrounds = self.check_shape_surrounds(shape, offset, self.gui.game.field)
+            scored_spaces.append([key, len(space_surrounds[1])])
+
+        scored_spaces.sort(key=lambda x: x[1], reverse=True)
+        most_borders = scored_spaces[0]
+        most_borders_space = possible_spaces[most_borders[0]]
+        self.set_target(most_borders_space)
 
     def set_target_to_least_gaps(self):
         possible_spaces = self.all_possible_spaces
