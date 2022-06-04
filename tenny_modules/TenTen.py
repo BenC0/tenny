@@ -54,7 +54,7 @@ class TenTen:
         if self.game.is_action_possible():
             if immediate:
                 self.player.play()
-            self.window.after(5, self.player_start)
+            self.window.after(100, self.player_start)
 
     def canvas_click(self, event):
         x = int(event.x / 50)
@@ -219,7 +219,7 @@ class Game:
     def set_filed(self, x, y, full):
         self.add_points(1)
         self.field[y][x] = full
-        self.print_field()
+        # self.print_field()
 
     def print_field(self):
         print("Field Updated, logging rows")
