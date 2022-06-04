@@ -20,10 +20,10 @@ class Player:
 
     def play(self):
         if self.final_preview_shown or (self.brrrrr and self.all_possible_spaces != None):
-            self.set_target_to_first_available_space()
+            # self.set_target_to_first_available_space()
             # self.set_target_to_least_gaps()
             # self.set_target_to_most_borders()
-            # self.set_target_to_most_lines_cleared()
+            self.set_target_to_most_lines_cleared()
             self.select_block(self.target_block)
             self.place_block()
             print(f"Moves played: {self.gui.moves_played}, Score: {self.gui.game.get_points()}")
@@ -74,7 +74,7 @@ class Player:
     def add_shape(self, input_field, shape, xy, val = 1):
         field = copy.deepcopy(input_field)
         for x, y in shape:
-            field[x + xy[0]][y + xy[1]] = val
+            field[y + xy[1]][x + xy[0]] = val
         return field
 
     def preview_placement(self, shape, offset, field):
@@ -98,13 +98,14 @@ class Player:
         most_lines_space = possible_spaces[most_lines[0]]
         print(f"most_lines: {most_lines}")
         print(f"most_lines_space: {most_lines_space}")
-        for row in most_lines[2]:
-            print(row)
-        print()
-        for row in self.gui.game.field:
-            print(row)
-        print()
+        self.print_field(most_lines[2])
         self.set_target(most_lines_space)
+        
+    def print_field(self, field):
+        print("Placement found, logging preview rows")
+        for row in field:
+            print(row)
+        print("All preview rows logged")
 
     def update_current_preview(self):
         try:
@@ -132,9 +133,9 @@ class Player:
             for r in range(0, 10):
                 for c in range(0, 10):
                     count += 1
-                    fuckingFitsMaybe = self.gui.game.fits(c, r, self.gui.game.selected_block.coord_array)
+                    fuckingFitsMaybe = self.gui.game.fits(r, c, self.gui.game.selected_block.coord_array)
                     if fuckingFitsMaybe:
-                        self.all_possible_spaces.append((i, c, r, self.gui.game.selected_block.coord_array))
+                        self.all_possible_spaces.append((i, r, c, self.gui.game.selected_block.coord_array))
         print(f"Spaces evaluated: {count}, Possible spaces found: {len(self.all_possible_spaces)}")
 
     def reset_target(self):

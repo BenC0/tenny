@@ -46,7 +46,7 @@ class TenTen:
         self.player = Player(self)
         self.render_current_blocks()
 
-        # self.player_start(False)
+        self.player_start(False)
         # GUILoseScreen(self.window, self.game, self.lose_img)
         self.window.mainloop()
     
