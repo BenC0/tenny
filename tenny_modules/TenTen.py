@@ -46,7 +46,7 @@ class TenTen:
         self.player = Player(self)
         self.render_current_blocks()
 
-        self.player_start(False)
+        # self.player_start(False)
         # GUILoseScreen(self.window, self.game, self.lose_img)
         self.window.mainloop()
     
@@ -219,6 +219,13 @@ class Game:
     def set_filed(self, x, y, full):
         self.add_points(1)
         self.field[y][x] = full
+        self.print_field()
+
+    def print_field(self):
+        print("Field Updated, logging rows")
+        for row in self.field:
+            print(row)
+        print("All rows logged")
     
     def set_filed_preview(self, preview, x, y, full):
         preview.points = int(preview.points) + 1
