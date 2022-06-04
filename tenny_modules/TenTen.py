@@ -113,6 +113,7 @@ class TenTen:
                                     self.last_preview.append([x + ca[index][0], y + ca[index][1]])
 
     def place(self, x, y, coordinates):
+        print(f"Placing block at ({x}, {y})")
         for index in range(0, len(coordinates)):
             self.draw_rect_on_coordinates(x + coordinates[index][0], y + coordinates[index][1])
             self.game.set_filed(x + coordinates[index][0], y + coordinates[index][1], 1)

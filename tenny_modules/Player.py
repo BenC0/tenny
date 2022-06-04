@@ -9,8 +9,8 @@ class Player:
         self.points = gui.game.get_points()
         self.hand = gui.game.current_blocks
         self.field = gui.game.field
-        self.brrrrr = True
-        # self.brrrrr = False
+        # self.brrrrr = True
+        self.brrrrr = False
         self.reset_target()
 
     class Event:
@@ -45,23 +45,31 @@ class Player:
     
     def check_lines(self, preview):
         lines_filled = 0
-        for row in range(0, 10):
-            row_count = 0
+        for line in range(0, 10):
+            columns_filled = 0
             for column in range(0, 10):
-                row_count += preview[row][column]
-            if row_count == 10:
+                if preview[line][column] == 1:
+                    columns_filled += 1
+                else:
+                    break
+            if columns_filled == 10:
+                print("Line is full")
                 lines_filled += 1
-        return lines_filled     
+        return lines_filled
     
     def check_columns(self, preview):
         columns_filled = 0
         for column in range(0, 10):
-            col_count = 0
-            for row in range(0, 10):
-                col_count += preview[row][column]
-            if col_count == 10:
+            lines_filled = 0
+            for line in range(0, 10):
+                if preview[line][column] == 1:
+                    lines_filled += 1
+                else:
+                    break
+            if lines_filled == 10:
+                print("Column is full")
                 columns_filled += 1
-        return columns_filled        
+        return columns_filled
 
     def add_shape(self, input_field, shape, xy, val = 1):
         field = copy.deepcopy(input_field)
@@ -73,21 +81,29 @@ class Player:
         return self.add_shape(field, shape, offset)
 
     def set_target_to_most_lines_cleared(self):
-        field = copy.deepcopy(self.gui.game.field)
         possible_spaces = self.all_possible_spaces
         scored_spaces = []
         for key, space in enumerate(possible_spaces):
             offset, shape, = (space[1], space[2]), space[3]
+            field = copy.deepcopy(self.gui.game.field)
             preview = self.preview_placement(shape, offset, field)
             lines = self.check_lines(preview)
             columns = self.check_columns(preview)
-            scored_spaces.append([key, lines + columns])
+            scored_spaces.append([key, lines + columns, preview])
 
-        scored_spaces.sort(key=lambda x: x[1], reverse=True)
+        should_we_sort = sum([x[1] for x in scored_spaces])
+        if should_we_sort > 0:
+            scored_spaces.sort(key=lambda x: x[1], reverse=True)
         most_lines = scored_spaces[0]
         most_lines_space = possible_spaces[most_lines[0]]
         print(f"most_lines: {most_lines}")
         print(f"most_lines_space: {most_lines_space}")
+        for row in most_lines[2]:
+            print(row)
+        print()
+        for row in self.gui.game.field:
+            print(row)
+        print()
         self.set_target(most_lines_space)
 
     def update_current_preview(self):
@@ -113,13 +129,12 @@ class Player:
         for i in range(0, len(self.hand)):
             self.target_block = i
             self.select_block(self.target_block)
-            for row_num, row in enumerate(self.field):
-                for col_num, col in enumerate(row):
+            for r in range(0, 10):
+                for c in range(0, 10):
                     count += 1
-                    fuckingFitsMaybe = self.gui.game.fits(row_num, col_num, self.gui.game.selected_block.coord_array)
+                    fuckingFitsMaybe = self.gui.game.fits(c, r, self.gui.game.selected_block.coord_array)
                     if fuckingFitsMaybe:
-                        self.all_possible_spaces.append((i, row_num, col_num, self.gui.game.selected_block.coord_array))
-        
+                        self.all_possible_spaces.append((i, c, r, self.gui.game.selected_block.coord_array))
         print(f"Spaces evaluated: {count}, Possible spaces found: {len(self.all_possible_spaces)}")
 
     def reset_target(self):
@@ -238,6 +253,7 @@ class Player:
         self.set_target(first_available)
     
     def set_target(self, target):
+        print(f"Setting Target: {target}")
         self.target_block = target[0]
         self.target_coord = (target[1], target[2])
 
