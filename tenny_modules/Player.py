@@ -23,7 +23,8 @@ class Player:
             # self.set_target_to_first_available_space()
             # self.set_target_to_least_gaps()
             # self.set_target_to_most_borders()
-            self.set_target_to_most_lines_cleared()
+            # self.set_target_to_most_lines_cleared()
+            self.set_target_to_most_lines_and_least_gaps()
             self.select_block(self.target_block)
             self.place_block()
             print(f"Moves played: {self.gui.moves_played}, Score: {self.gui.game.get_points()}")
@@ -79,6 +80,30 @@ class Player:
 
     def preview_placement(self, shape, offset, field):
         return self.add_shape(field, shape, offset)
+
+    def set_target_to_most_lines_and_least_gaps(self):
+        possible_spaces = self.all_possible_spaces
+        scored_spaces = []
+        for key, space in enumerate(possible_spaces):
+            offset, shape, = (space[1], space[2]), space[3]
+            field = copy.deepcopy(self.gui.game.field)
+            preview = self.preview_placement(shape, offset, field)
+            space_surrounds = self.check_shape_surrounds(shape, offset, self.gui.game.field)
+            lines = self.check_lines(preview) * .75
+            columns = self.check_columns(preview) * .75
+            gaps = len(space_surrounds[0]) * 1
+            borders = len(space_surrounds[1]) * .25
+            scored_spaces.append([key, lines + columns + borders - gaps, preview])
+
+        should_we_sort = sum([x[1] for x in scored_spaces])
+        if should_we_sort > 0:
+            scored_spaces.sort(key=lambda x: x[1], reverse=True)
+        most_lines = scored_spaces[0]
+        most_lines_space = possible_spaces[most_lines[0]]
+        print(f"most_lines: {most_lines}")
+        print(f"most_lines_space: {most_lines_space}")
+        self.print_field(most_lines[2])
+        self.set_target(most_lines_space)
 
     def set_target_to_most_lines_cleared(self):
         possible_spaces = self.all_possible_spaces
