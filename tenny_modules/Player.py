@@ -1,7 +1,9 @@
 import enum, copy
 from turtle import pos
+from xmlrpc.client import Boolean
 from matplotlib.style import available
 import numpy as np
+from scipy import ndimage
 
 class Player:
     def __init__(self, gui):
@@ -9,8 +11,8 @@ class Player:
         self.points = gui.game.get_points()
         self.hand = gui.game.current_blocks
         self.field = gui.game.field
-        self.brrrrr = True
-        # self.brrrrr = False
+        # self.brrrrr = True
+        self.brrrrr = False
         self.reset_target()
 
     class Event:
@@ -78,6 +80,31 @@ class Player:
             field[y + xy[1]][x + xy[0]] = val
         return field
 
+    def invert_preview(self, preview):
+        inverted = []
+        for row in preview:
+            inverted_row = []
+            for val in row:
+                inverted_row.append(~val)
+            inverted += inverted_row
+
+        return inverted
+
+    def handle_labels(self, val, pos):
+        # if val[0] == 0:
+        #     return 1
+        return val[0]
+
+    def get_preview_gappiness(self, preview):
+        gaps = 0
+        inverted = self.invert_preview(preview)
+        lbl, nlbl = ndimage.label(inverted)
+        labels = np.arange(1, nlbl + 1)
+        m = ndimage.median(inverted, labels=lbl)
+        comp = ndimage.labeled_comprehension(inverted, lbl, labels, self.handle_labels, int, -1, True)
+        gaps = sum(comp)
+        return (gaps, m)
+
     def preview_placement(self, shape, offset, field):
         return self.add_shape(field, shape, offset)
 
@@ -89,11 +116,21 @@ class Player:
             field = copy.deepcopy(self.gui.game.field)
             preview = self.preview_placement(shape, offset, field)
             space_surrounds = self.check_shape_surrounds(shape, offset, self.gui.game.field)
-            lines = self.check_lines(preview) * .75
-            columns = self.check_columns(preview) * .75
-            gaps = len(space_surrounds[0]) * 1
-            borders = len(space_surrounds[1]) * .25
-            scored_spaces.append([key, lines + columns + borders - gaps, preview])
+            gappiness = self.get_preview_gappiness(preview)[0]
+            comp = self.get_preview_gappiness(preview)
+            lines = self.check_lines(preview)
+            columns = self.check_columns(preview)
+            immediate_gaps = ~len(space_surrounds[0])
+            borders = len(space_surrounds[1])
+            detail_str = f"\n - gappiness: {gappiness},"
+            detail_str += f"\n - lines + columns: {lines + columns},"
+            detail_str += f"\n - borders: {borders},"
+            detail_str += f"\n - immediate_gaps: {immediate_gaps}"
+            detail_str += f"\n - combined_gappiness: {gappiness + immediate_gaps},"
+            detail_str += f"\n - combined_line_completion: {lines + columns},"
+            detail_str += f"\n - final_result: {(gappiness + immediate_gaps) - (lines + columns) + borders},"
+            detail_str += f"\n - comp: {comp}"
+            scored_spaces.append([key, (gappiness) + (lines + columns) + gappiness, preview, detail_str])
 
         should_we_sort = sum([x[1] for x in scored_spaces])
         if should_we_sort > 0:
@@ -102,6 +139,7 @@ class Player:
         most_lines_space = possible_spaces[most_lines[0]]
         print(f"most_lines: {most_lines}")
         print(f"most_lines_space: {most_lines_space}")
+        print(f"most_lines details: {most_lines[3]}")
         self.print_field(most_lines[2])
         self.set_target(most_lines_space)
 
@@ -151,17 +189,31 @@ class Player:
 
     def find_all_possible_spaces(self):
         self.all_possible_spaces = []
+        evaluated_spaces = []
         count = 0
         for i in range(0, len(self.hand)):
             self.target_block = i
             self.select_block(self.target_block)
             for r in range(0, 10):
                 for c in range(0, 10):
-                    count += 1
-                    fuckingFitsMaybe = self.gui.game.fits(r, c, self.gui.game.selected_block.coord_array)
-                    if fuckingFitsMaybe:
-                        self.all_possible_spaces.append((i, r, c, self.gui.game.selected_block.coord_array))
+                    if (r, c, self.gui.game.selected_block.coord_array) not in evaluated_spaces:
+                        count += 1
+                        evaluated_spaces.append((r, c, self.gui.game.selected_block.coord_array))
+                        fuckingFitsMaybe = self.gui.game.fits(r, c, self.gui.game.selected_block.coord_array)
+                        if fuckingFitsMaybe:
+                            self.all_possible_spaces.append((i, r, c, self.gui.game.selected_block.coord_array))
+        self.all_possible_spaces = self.remove_duplicate_spaces()
         print(f"Spaces evaluated: {count}, Possible spaces found: {len(self.all_possible_spaces)}")
+
+    def remove_duplicate_spaces(self):
+        stripped_spaces, deduped = [], []
+        for space in self.all_possible_spaces:
+            de_indexed = (space[1], space[2], space[3])
+            if de_indexed in stripped_spaces:
+                stripped_spaces.append(de_indexed)
+            else:
+                deduped.append(space)
+        return deduped
 
     def reset_target(self):
         self.target_block = 0
